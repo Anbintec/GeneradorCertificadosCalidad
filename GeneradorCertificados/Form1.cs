@@ -15,8 +15,10 @@ using System.Windows.Forms;
 
 namespace GeneradorCertificados
 {
+    
     public partial class Form1 : Form
     {
+        private FileStream DocumentoActual = null;
         string name = null;
         string file = null;
         string namesalida = null;
@@ -149,10 +151,11 @@ namespace GeneradorCertificados
 
                 ReportteSalida.ProcessingMode = Microsoft.Reporting.WinForms.ProcessingMode.Remote;//
                 ReportteSalida.ServerReport.ReportServerUrl = new Uri("http://www.samaltamira.net/ReportServer/");
-                Reporte();
-
+                this.url = ((Proyecto)ListaProyecto.SelectedItem).RutaEspaniol;
+               string mensaje="";
                 if (url.Length > 0)
                 {
+                    CrearObtenerCSV(filesalida, name.Split('.')[0], out mensaje);
 
                     ReportteSalida.ServerReport.ReportPath = @"/" + url;//direccion de la consulta de responder
 
@@ -189,6 +192,7 @@ namespace GeneradorCertificados
                     }
                     btnReporte.Enabled = false;
                     BarraProcesos.Value = 100;
+                    CerrarDocumento();
                     MessageBox.Show("Se termino la generación de certificados.");
                     clear();
                     BarraProcesos.Value = 0;
@@ -258,54 +262,98 @@ namespace GeneradorCertificados
             String[] ListaNumerosControl = sincoma.Split(',');
             foreach (var NumControlActual in ListaNumerosControl)
             {
-                List<ReportParameter> parametros = new List<ReportParameter>();
-                parametros.Add(new ReportParameter("ProyectoID", ListaProyecto.SelectedValue.ToString()));
-                parametros.Add(new ReportParameter("NumeroControl", NumControlActual));
-                this.ReportteSalida.ServerReport.SetParameters(parametros);
-                this.ReportteSalida.RefreshReport();
+                try
+                {
+                    string numeroReporte = ObtenerNumeroReporte(NumControlActual);
+                    List<ReportParameter> parametros = new List<ReportParameter>();
+                    parametros.Add(new ReportParameter("ProyectoID", ListaProyecto.SelectedValue.ToString()));
+                    parametros.Add(new ReportParameter("NumeroReporte", numeroReporte));
 
-                filetype = exportType == "" ? "" : exportType;
-                byte[] bytes = ReportteSalida.ServerReport.Render(filetype, null, // deviceinfo not needed for csv
-               out mimeType, out encoding, out extension, out streamIds, out warnings);
 
-                FileStream fs = new FileStream(filesalida + "\\" + NumControlActual + ".pdf", FileMode.OpenOrCreate);
+                    this.ReportteSalida.ServerReport.SetParameters(parametros);
+                    this.ReportteSalida.RefreshReport();
 
-                fs.Write(bytes, 0, bytes.Length);
-                fs.Close();
-                BarraProcesos.Value = (i + 10);
+                    filetype = exportType == "" ? "" : exportType;
+                    byte[] bytes = ReportteSalida.ServerReport.Render(filetype, null, // deviceinfo not needed for csv
+                   out mimeType, out encoding, out extension, out streamIds, out warnings);
+
+                    FileStream fs = new FileStream(filesalida + "\\" + NumControlActual + ".pdf", FileMode.OpenOrCreate);
+
+                    fs.Write(bytes, 0, bytes.Length);
+                    fs.Close();
+                    BarraProcesos.Value = (i + 10);
+                }
+                catch (ReportServerException ex)
+                {
+                    this.EscribirMensajeDocumento("", NumControlActual, " No se encontro el numero de control ");
+                }
+                catch (Exception ex)
+                {
+                    this.EscribirMensajeDocumento("", NumControlActual, ex.Message);
+                }
+               
             }
-            ///////////////////////
-           // List<ReportParameter> parametros = new List<ReportParameter>();
-           // parametros.Add(new ReportParameter("ProyectoID", ListaProyecto.SelectedValue.ToString()));
-           // parametros.Add(new ReportParameter("NumeroControl", sincoma));
-           // this.ReportteSalida.ServerReport.SetParameters(parametros);
-           // this.ReportteSalida.RefreshReport();
-
-           // filetype = exportType == "" ? "" : exportType;
-           // byte[] bytes = ReportteSalida.ServerReport.Render(filetype, null, // deviceinfo not needed for csv
-           //out mimeType, out encoding, out extension, out streamIds, out warnings);
-
-           // FileStream fs = new FileStream(filesalida + "\\" + nombreArchivo, FileMode.OpenOrCreate);
-
-           // fs.Write(bytes, 0, bytes.Length);
-           // fs.Close();
-           // BarraProcesos.Value = (i + 10);
-
-            // clear();
+          
         }
+
+        public string ObtenerNumeroReporte(string numeroControl)
+        {
+            string retorno;
+            SqlCommand com = new SqlCommand("ObtenerNumeroReporte", conexion);
+            com.CommandType = CommandType.StoredProcedure;
+            SqlParameter p = com.Parameters.Add("@ProyectoID", SqlDbType.Int);
+            p.Value = Convert.ToInt32(ListaProyecto.SelectedValue.ToString());
+            SqlParameter pp = com.Parameters.Add("@NumeroControl", SqlDbType.VarChar);
+            pp.Value = numeroControl;
+
+
+            SqlParameter result = new SqlParameter("@retorno", SqlDbType.VarChar, 100);
+            result.Direction = ParameterDirection.Output;
+            com.Parameters.Add(result);
+
+
+
+            conexion.Open();
+            com.ExecuteNonQuery();
+            retorno = Convert.ToString(result.SqlValue.ToString());
+            conexion.Close();
+
+            return retorno;
+
+        }
+
         public void LlenarComboProyecto()
         {
 
             conexion.Open();
             DataSet ds = new DataSet();
-            SqlDataAdapter da = new SqlDataAdapter("select ProyectoID,Nombre from UrlCertificadoBk", conexion);
+            SqlDataAdapter da = new SqlDataAdapter("select A.ProyectoID,B.Nombre,A.RutaEspaniol from ProyectoReporte A INNER JOIN Proyecto B ON A.ProyectoID=B.ProyectoID WHERE B.ActivoReporte=1 AND A.TipoReporteProyectoID=4 order by  A.ProyectoID", conexion);
             da.Fill(ds, "Proyecto");
-            ListaProyecto.DataSource = ds.Tables[0].DefaultView;
+            ListaProyecto.DataSource = ObtenerListaProyectos(ds.Tables[0]);
             ListaProyecto.ValueMember = "ProyectoID";
             ListaProyecto.DisplayMember = "Nombre";
             conexion.Close();
             btnExaminar.Enabled = true;
         }
+
+
+
+        private List<Proyecto> ObtenerListaProyectos(DataTable dtProyectos)
+        {
+            List<Proyecto> listaProyectos = new List<Proyecto>();
+
+            for (int i = 0; i < dtProyectos.Rows.Count; i++)
+            {
+                listaProyectos.Add(new Proyecto
+                {
+                    ProyectoID = int.Parse(dtProyectos.Rows[i][0].ToString()),
+                    Nombre = dtProyectos.Rows[i][1].ToString(),
+                    RutaEspaniol = dtProyectos.Rows[i][2].ToString()
+                });
+            }
+            return listaProyectos;
+        }
+
         public string Reporte()
         {
 
@@ -333,6 +381,99 @@ namespace GeneradorCertificados
         {
 
         }//interaccion con reporte
+
+        private void lblAyuda_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        public bool CrearObtenerCSV(string pathDestino, string nombreNuevoArchivoPDF, out string mensaje)
+        {
+            try
+            {
+                nombreNuevoArchivoPDF = "PDF_" + nombreNuevoArchivoPDF;
+                int contador = 0;
+
+                string rutaArchivo = pathDestino + "\\" + nombreNuevoArchivoPDF + ".csv";
+                while (File.Exists(rutaArchivo))
+                {
+                    rutaArchivo = pathDestino + "\\" + nombreNuevoArchivoPDF + " " + (contador + 1) + ".csv";
+                    contador++;
+                }
+                //creo el archivo csv
+                crearArchivo(rutaArchivo);
+                EscribirMensajeDocumento("OrdenTrabajo", "Numero Control", "Comentario");
+                mensaje = (nombreNuevoArchivoPDF + " " + (contador == 0 ? "" : contador.ToString())).Trim();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                mensaje = ex.Message;
+                return false;
+            }
+
+        }
+
+        public bool crearArchivo(string path)
+        {
+            try
+            {
+                DocumentoActual = System.IO.File.Create(path);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+
+                throw;
+            }
+        }
+
+        public bool EscribirMensajeDocumento(string ordenTrabajo, string numeroControl, string comentario)
+        {
+            try
+            {
+                using (StringWriter sw = new StringWriter())
+                {
+                    sw.WriteLine(ordenTrabajo + "," + numeroControl + "," + comentario);
+                    byte[] info = new UTF8Encoding(true).GetBytes(sw.ToString());
+                    this.DocumentoActual.Write(info, 0, info.Length);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        public bool CerrarDocumento()
+        {
+            try
+            {
+                this.DocumentoActual.Close();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
     }
 
+    public class Proyecto
+    {
+        public int ProyectoID { get; set; }
+        public string Nombre { get; set; }
+        public string RutaEspaniol { get; set; }
+
+        public Proyecto()
+        {
+            ProyectoID = 0;
+            Nombre = "--Selecciona un proyecto--";
+            RutaEspaniol = "";
+        }
+    }
 }

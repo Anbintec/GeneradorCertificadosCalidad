@@ -40,27 +40,14 @@
             this.abrirarchivo = new System.Windows.Forms.OpenFileDialog();
             this.guardararchivo = new System.Windows.Forms.SaveFileDialog();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
-            this.ReportteSalida = new Microsoft.Reporting.WinForms.ReportViewer();
-            this.lblAyuda = new System.Windows.Forms.Label();
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.proyectoBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.sAMDataSet1 = new GeneradorCertificados.SAMDataSet1();
-            this.dataSet1 = new System.Data.DataSet();
-            this.sAMDataSet = new GeneradorCertificados.SAMDataSet();
-            this.sAMDataSetBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.proyectoTableAdapter = new GeneradorCertificados.SAMDataSet1TableAdapters.ProyectoTableAdapter();
             this.proyectoBindingSource1 = new System.Windows.Forms.BindingSource(this.components);
-            this.sAMDataSet2 = new GeneradorCertificados.SAMDataSet2();
-            this.proyectoTableAdapter1 = new GeneradorCertificados.SAMDataSet2TableAdapters.ProyectoTableAdapter();
             this.ListaProyecto = new System.Windows.Forms.ComboBox();
             this.lblproyecto = new System.Windows.Forms.Label();
+            this.ReportteSalida = new Microsoft.Reporting.WinForms.ReportViewer();
+            this.lblAyuda = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.proyectoBindingSource)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.sAMDataSet1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataSet1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.sAMDataSet)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.sAMDataSetBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.proyectoBindingSource1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.sAMDataSet2)).BeginInit();
             this.SuspendLayout();
             // 
             // BarraProcesos
@@ -142,6 +129,26 @@
             this.abrirarchivo.Filter = " | *.csv";
             this.abrirarchivo.RestoreDirectory = true;
             // 
+            // ListaProyecto
+            // 
+            this.ListaProyecto.AccessibleRole = System.Windows.Forms.AccessibleRole.Alert;
+            this.ListaProyecto.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.ListaProyecto.FormattingEnabled = true;
+            this.ListaProyecto.Location = new System.Drawing.Point(15, 61);
+            this.ListaProyecto.Name = "ListaProyecto";
+            this.ListaProyecto.Size = new System.Drawing.Size(373, 21);
+            this.ListaProyecto.TabIndex = 20;
+            this.ListaProyecto.SelectedIndexChanged += new System.EventHandler(this.ListaProyecto_SelectedIndexChanged);
+            // 
+            // lblproyecto
+            // 
+            this.lblproyecto.AutoSize = true;
+            this.lblproyecto.Location = new System.Drawing.Point(12, 45);
+            this.lblproyecto.Name = "lblproyecto";
+            this.lblproyecto.Size = new System.Drawing.Size(105, 13);
+            this.lblproyecto.TabIndex = 21;
+            this.lblproyecto.Text = "Seleccione Proyecto";
+            // 
             // ReportteSalida
             // 
             this.ReportteSalida.DocumentMapWidth = 55;
@@ -163,73 +170,7 @@
             this.lblAyuda.TabIndex = 19;
             this.lblAyuda.Text = "El archivo CSV solo debe tener en la columna A los numero de control de los cuale" +
     "s se desea obtener los certificados.";
-            // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
-            // 
-            // proyectoBindingSource
-            // 
-            this.proyectoBindingSource.DataMember = "Proyecto";
-            this.proyectoBindingSource.DataSource = this.sAMDataSet1;
-            // 
-            // sAMDataSet1
-            // 
-            this.sAMDataSet1.DataSetName = "SAMDataSet1";
-            this.sAMDataSet1.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
-            // 
-            // dataSet1
-            // 
-            this.dataSet1.DataSetName = "NewDataSet";
-            // 
-            // sAMDataSet
-            // 
-            this.sAMDataSet.DataSetName = "SAMDataSet";
-            this.sAMDataSet.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
-            // 
-            // sAMDataSetBindingSource
-            // 
-            this.sAMDataSetBindingSource.DataSource = this.sAMDataSet;
-            this.sAMDataSetBindingSource.Position = 0;
-            // 
-            // proyectoTableAdapter
-            // 
-            this.proyectoTableAdapter.ClearBeforeFill = true;
-            // 
-            // proyectoBindingSource1
-            // 
-            this.proyectoBindingSource1.DataMember = "Proyecto";
-            this.proyectoBindingSource1.DataSource = this.sAMDataSet2;
-            // 
-            // sAMDataSet2
-            // 
-            this.sAMDataSet2.DataSetName = "SAMDataSet2";
-            this.sAMDataSet2.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
-            // 
-            // proyectoTableAdapter1
-            // 
-            this.proyectoTableAdapter1.ClearBeforeFill = true;
-            // 
-            // ListaProyecto
-            // 
-            this.ListaProyecto.AccessibleRole = System.Windows.Forms.AccessibleRole.Alert;
-            this.ListaProyecto.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.ListaProyecto.FormattingEnabled = true;
-            this.ListaProyecto.Location = new System.Drawing.Point(15, 61);
-            this.ListaProyecto.Name = "ListaProyecto";
-            this.ListaProyecto.Size = new System.Drawing.Size(373, 21);
-            this.ListaProyecto.TabIndex = 20;
-            this.ListaProyecto.SelectedIndexChanged += new System.EventHandler(this.ListaProyecto_SelectedIndexChanged);
-            // 
-            // lblproyecto
-            // 
-            this.lblproyecto.AutoSize = true;
-            this.lblproyecto.Location = new System.Drawing.Point(12, 45);
-            this.lblproyecto.Name = "lblproyecto";
-            this.lblproyecto.Size = new System.Drawing.Size(105, 13);
-            this.lblproyecto.TabIndex = 21;
-            this.lblproyecto.Text = "Seleccione Proyecto";
+            this.lblAyuda.Click += new System.EventHandler(this.lblAyuda_Click);
             // 
             // Form1
             // 
@@ -242,7 +183,6 @@
             this.Controls.Add(this.lblproyecto);
             this.Controls.Add(this.ListaProyecto);
             this.Controls.Add(this.lblAyuda);
-            this.Controls.Add(this.ReportteSalida);
             this.Controls.Add(this.BarraProcesos);
             this.Controls.Add(this.mostrar1);
             this.Controls.Add(this.txtRutaSalida);
@@ -251,17 +191,13 @@
             this.Controls.Add(this.txtRutaEntrada);
             this.Controls.Add(this.btnExaminar);
             this.Controls.Add(this.label1);
+            this.Controls.Add(this.ReportteSalida);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Generador de Certificados";
+            this.Text = "Generador Dimensional";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.proyectoBindingSource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.sAMDataSet1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dataSet1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.sAMDataSet)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.sAMDataSetBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.proyectoBindingSource1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.sAMDataSet2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -280,20 +216,14 @@
         private System.Windows.Forms.OpenFileDialog abrirarchivo;
         private System.Windows.Forms.SaveFileDialog guardararchivo;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
-        private Microsoft.Reporting.WinForms.ReportViewer ReportteSalida;
-        private System.Windows.Forms.Label lblAyuda;
-        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Data.DataSet dataSet1;
-        private SAMDataSet sAMDataSet;
-        private System.Windows.Forms.BindingSource sAMDataSetBindingSource;
-        private SAMDataSet1 sAMDataSet1;
         private System.Windows.Forms.BindingSource proyectoBindingSource;
-        private SAMDataSet1TableAdapters.ProyectoTableAdapter proyectoTableAdapter;
-        private SAMDataSet2 sAMDataSet2;
+        
         private System.Windows.Forms.BindingSource proyectoBindingSource1;
-        private SAMDataSet2TableAdapters.ProyectoTableAdapter proyectoTableAdapter1;
+        
         private System.Windows.Forms.ComboBox ListaProyecto;
         private System.Windows.Forms.Label lblproyecto;
+        private Microsoft.Reporting.WinForms.ReportViewer ReportteSalida;
+        private System.Windows.Forms.Label lblAyuda;
     }
 }
 
