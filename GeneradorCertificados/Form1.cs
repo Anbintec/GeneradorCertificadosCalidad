@@ -15,7 +15,7 @@ using System.Windows.Forms;
 
 namespace GeneradorCertificados
 {
-    
+
     public partial class Form1 : Form
     {
         private FileStream DocumentoActual = null;
@@ -140,67 +140,70 @@ namespace GeneradorCertificados
         }
         private void btnReporte_Click(object sender, EventArgs e)
         {
-            string var2;
-            //try
-            //{
-            if (leer_archivo(this.file))
+            DataTable dt = ConvertToDataTable(file, 1);
+            if (dt.Rows.Count < 70)
             {
-                btnExaminar.Enabled = false;
-                BarraProcesos.Value = 10;
-                btnRutaSalida.Enabled = false;
-
-                ReportteSalida.ProcessingMode = Microsoft.Reporting.WinForms.ProcessingMode.Remote;//
-                ReportteSalida.ServerReport.ReportServerUrl = new Uri("http://www.samaltamira.net/ReportServer/");
-                this.url = ((Proyecto)ListaProyecto.SelectedItem).RutaEspaniol;
-               string mensaje="";
-                if (url.Length > 0)
+                string var2;
+                //try
+                //{
+                if (leer_archivo(this.file))
                 {
-                    CrearObtenerCSV(filesalida, name.Split('.')[0], out mensaje);
+                    btnExaminar.Enabled = false;
+                    BarraProcesos.Value = 10;
+                    btnRutaSalida.Enabled = false;
 
-                    ReportteSalida.ServerReport.ReportPath = @"/" + url;//direccion de la consulta de responder
-
-                    NetworkCredential myCred = new NetworkCredential("Administrator@steelgo.com", "5T33lt3c2016@", "");
-                    ReportteSalida.ServerReport.ReportServerCredentials.NetworkCredentials = myCred;
-
-                    BarraProcesos.Value = 20;
-                    mostrar1.Text = "PROCESANDO";
-                    int len = listado.Count;
-                    int maxleng = 200;
-                    int ultimocilo = len % maxleng;
-                    int ciclos = ultimocilo == 0 ? (len / maxleng) : (len / maxleng) + 1;
-                    ultimocilo = ultimocilo == 0 ? maxleng : ultimocilo;
-                    string sincoma = "";
-                    // MessageBox.Show(this, "-+++-" + ultimocilo);
-                    //MessageBox.Show(this, "-+++-" + ciclos);
-
-                    for (int i = 0; i < ciclos; i++)
+                    ReportteSalida.ProcessingMode = Microsoft.Reporting.WinForms.ProcessingMode.Remote;//
+                    ReportteSalida.ServerReport.ReportServerUrl = new Uri("http://www.samaltamira.net/ReportServer/");
+                    this.url = ((Proyecto)ListaProyecto.SelectedItem).RutaEspaniol;
+                    string mensaje = "";
+                    if (url.Length > 0)
                     {
-                        var2 = "";
-                        //int var1 = 0;
-                        int limite = ciclos == 1 ? ultimocilo : i == ciclos - 1 ? ultimocilo : maxleng;
-                        // MessageBox.Show(this, "*****+" + limite);    
-                        for (int j = 0; j < limite; j++)
+                        CrearObtenerCSV(filesalida, name.Split('.')[0], out mensaje);
+
+                        ReportteSalida.ServerReport.ReportPath = @"/" + url;//direccion de la consulta de responder
+
+                        NetworkCredential myCred = new NetworkCredential("Administrator@steelgo.com", "5T33lt3c2016@", "");
+                        ReportteSalida.ServerReport.ReportServerCredentials.NetworkCredentials = myCred;
+
+                        BarraProcesos.Value = 20;
+                        mostrar1.Text = "PROCESANDO";
+                        int len = listado.Count;
+                        int maxleng = 200;
+                        int ultimocilo = len % maxleng;
+                        int ciclos = ultimocilo == 0 ? (len / maxleng) : (len / maxleng) + 1;
+                        ultimocilo = ultimocilo == 0 ? maxleng : ultimocilo;
+                        string sincoma = "";
+                        // MessageBox.Show(this, "-+++-" + ultimocilo);
+                        //MessageBox.Show(this, "-+++-" + ciclos);
+
+                        for (int i = 0; i < ciclos; i++)
                         {
-                            // MessageBox.Show(this, "--"+(j + i * maxleng));
-                            var2 += listado[j + i * maxleng] + ",";
+                            var2 = "";
+                            //int var1 = 0;
+                            int limite = ciclos == 1 ? ultimocilo : i == ciclos - 1 ? ultimocilo : maxleng;
+                            // MessageBox.Show(this, "*****+" + limite);    
+                            for (int j = 0; j < limite; j++)
+                            {
+                                // MessageBox.Show(this, "--"+(j + i * maxleng));
+                                var2 += listado[j + i * maxleng] + ",";
 
+                            }
+                            sincoma = var2.TrimEnd(',');
+                            string salida = namesalida + "_" + (i + 1) + ".pdf";
+
+                            this.OpSalidaArchivo(sincoma, salida, i);
                         }
-                        sincoma = var2.TrimEnd(',');
-                        string salida = namesalida + "_" + (i + 1) + ".pdf";
+                        btnReporte.Enabled = false;
+                        BarraProcesos.Value = 100;
+                        CerrarDocumento();
+                        MessageBox.Show("Se termino la generación de certificados.");
+                        clear();
+                        BarraProcesos.Value = 0;
 
-                        this.OpSalidaArchivo(sincoma, salida, i);
+
                     }
-                    btnReporte.Enabled = false;
-                    BarraProcesos.Value = 100;
-                    CerrarDocumento();
-                    MessageBox.Show("Se termino la generación de certificados.");
-                    clear();
-                    BarraProcesos.Value = 0;
+                    else
 
-
-                }
-                else
-                    
                     {
                         MessageBox.Show(this, "Error no existe Reporte Solicitado ");
                         BarraProcesos.Enabled = false;
@@ -211,16 +214,26 @@ namespace GeneradorCertificados
                     }
 
 
+                }
+                else
+                {
+                    MessageBox.Show(this, "Verifique Formato del archivo ");
+                    BarraProcesos.Enabled = false;
+                    btnReporte.Enabled = false;
+                    BarraProcesos.Value = 0;
+                    clear();
+                    BarraProcesos.Value = 0;
+
+                }
             }
             else
             {
-                MessageBox.Show(this, "Verifique Formato del archivo ");
+                MessageBox.Show(this, "El número máximo permitido es 70");
                 BarraProcesos.Enabled = false;
                 btnReporte.Enabled = false;
                 BarraProcesos.Value = 0;
                 clear();
                 BarraProcesos.Value = 0;
-
             }
 
         }
@@ -234,7 +247,7 @@ namespace GeneradorCertificados
         //    BarraProcesos.Value = 0;
         //}
         //}
-        private void Form1_Load(object sender, EventArgs e) 
+        private void Form1_Load(object sender, EventArgs e)
         {
 
             LlenarComboProyecto();
@@ -247,6 +260,34 @@ namespace GeneradorCertificados
 
         private void btnCancelar_Click(object sender, EventArgs e)
         {
+        }
+
+        public DataTable ConvertToDataTable(string filePath, int numberOfColumns)
+        {
+            DataTable tbl = new DataTable();
+
+            for (int col = 0; col < numberOfColumns; col++)
+                tbl.Columns.Add(new DataColumn("Column" + (col + 1).ToString()));
+
+
+            string[] lines = System.IO.File.ReadAllLines(filePath);
+
+            foreach (string line in lines)
+            {
+
+                var cols = line.Split(',');
+
+                DataRow dr = tbl.NewRow();
+                for (int cIndex = 0; cIndex < numberOfColumns; cIndex++)
+                {
+                    dr[cIndex] = cols[cIndex];
+                }
+
+                tbl.Rows.Add(dr);
+
+            }
+
+            return tbl;
         }
 
         private void OpSalidaArchivo(String sincoma, String nombreArchivo, int i)
@@ -291,9 +332,9 @@ namespace GeneradorCertificados
                 {
                     this.EscribirMensajeDocumento("", NumControlActual, ex.Message);
                 }
-               
+
             }
-          
+
         }
 
         public string ObtenerNumeroReporte(string numeroControl)
